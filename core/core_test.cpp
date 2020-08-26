@@ -2,97 +2,53 @@
 
 #include <cstdint>
 #include <iostream>
+#include <fstream>
 
-std::vector<Gear<int16_t>> heads = {
-    Gear<int16_t>("Õ÷·şÕßµÄ»Ê¹Ú", Slot::HEAD, 29, 18, 34, 739, 6),
-    //{"ÎŞ¾¡Å­ÆøÍ·¿ø", Slot::HEAD, 26, 26, 29, 679},
-}; /*
-std::vector<Gear<int16_t>> necks = {
-    {"ÍÀÁú´óÊ¦Ñ«ÕÂ", Slot::NECK, 0, 14, 24, 0, 7},
-    {"¿ËËÕ¶÷µÄÓ¡¼Ç", Slot::NECK, 0, 0, 24, 0, 10, 1, 0, 0, 0, 1},
-    {"°ÂÄİ¿ËÏ£ÑÇÁúÑÀ×¹ÊÎ", Slot::NECK, 0, 12, 9, 0, 0, 0, 0, 0, 0, 1, 1},
-};
-std::vector<Gear<int16_t>> shoulders = {
-    {"Õ÷·şÕßµÄ¼çîø", Slot::SHOULDER, 20, 16, 21, 659, 4, 0, 0, 0, 0, 1},
-    {"·ßÅ­¼çîø", Slot::SHOULDER, 13, 0, 27, 642, 7, 0, 0, 0, 27},
-    {"Áú×¦¼çîø", Slot::SHOULDER, 20, 20, 17, 634, 0, 1},
-};
-std::vector<Gear<int16_t>> backs = {
-    {"¶éÂäÉñÃ÷Åû·ç", Slot::BACK, 11, 26, 15, 66},
-    {"Ô´ÖÊË¿ÏßÅû·ç", Slot::BACK, 0, 0, 13, 169, 0, 2},
-    {"¼á¶¨Á¦Á¿Åû·ç", Slot::BACK, 15, 9, 9, 52, 0, 0, 0, 0, 0, 1},
-    {"É³Ä®·ç±©Åû·ç", Slot::BACK, 12, 0, 12, 135, 6, 1},
-    {"½ğ³²Åû·ç", Slot::BACK, 13, 10, 19, 59, 6},
-};
-std::vector<Gear<int16_t>> chests = {
-    {"Õ÷·şÕßµÄĞØ¼×", Slot::CHEST, 34, 24, 38, 985, 6},
-};
-std::vector<Gear<int16_t>> wrists = {
-    {"·ßÅ­»¤Íó", Slot::WRIST, 13, 0, 27, 375},
-    {"Ò°Âù»¤Íó", Slot::WRIST, 21, 12, 9, 356},
-};
-std::vector<Gear<int16_t>> hands = {
-    {"»ÙÃğ»¤ÊÖ", Slot::HAND, 35, 0, 15, 615, 0, 0, 0, 0, 0, 1, 1},
-    {"·ßÅ­»¤ÊÖ", Slot::HAND, 15, 0, 20, 535, 7, 0, 1},
-    {"ÁÒÑæÊØÎÀ»¤ÊÖ", Slot::HAND, 0, 0, 13, 488, 0, 0, 0, 0, 0, 0, 1, 54},
-    {"¼á¶¨ĞÅÄî»¤ÊÖ", Slot::HAND, 19, 18, 20, 535, 9},
-};
-std::vector<Gear<int16_t>> waists = {
-    {"»Ê¼ÒÆäÀ­Ñü´ø", Slot::WAIST, 13, 13, 22, 512, 8, 0, 1},
-    {"³å»÷Êø´ø", Slot::WAIST, 31, 0, 11, 494, 0, 0, 0, 0, 0, 1, 1},
-    {"ÂûÑÓÑü´ø", Slot::WAIST, 26, 19, 17, 476},
-};
-std::vector<Gear<int16_t>> legs = {
-    {"Õ÷·şÕßµÄÍÈîø", Slot::LEG, 33, 21, 24, 796, 6, 0, 0, 0, 0, 1},
-    {"·ßÅ­ÍÈîø", Slot::LEG, 19, 0, 27, 749, 11, 2},
-};
-std::vector<Gear<int16_t>> feet = {
-    {"·ßÅ­ÂíÑ¥", Slot::FEET, 13, 0, 30, 589, 7, 0, 0, 0, 14},
-    {"¶à²Ê³¤Ñ¥", Slot::FEET, 20, 20, 19, 596, 0, 0, 0, 0, 0, 1},
-    {"Õ÷·şÕßµÄëÖ¼×", Slot::FEET, 21, 17, 23, 604, 4},
-};
-std::vector<Gear<int16_t>> fingers = {
-    {"°£¹ÅÀ×ÑÇÖ¸»·", Slot::FINGER, 0, 16, 10, 0, 0, 0, 0, 0, 0, 2},
-    {"Ñ¸»÷½äÖ¸", Slot::FINGER, 5, 0, 8, 0, 0, 0, 0, 0, 0, 0, 1, 30},
-    {"³ÁÖØµÄºÚÌú½äÖ¸", Slot::FINGER, 0, 0, 20, 110, 5},
-    {"´ó½ğ±í", Slot::FINGER, 0, 14, 28, 0},
-    {"ÍÀÁú´óÊ¦Ö®½ä", Slot::FINGER, 0, 0, 14, 0, 0, 0, 0, 0, 0, 0, 1, 48},
-    {"Ô´Á¦Ö®»·", Slot::FINGER, 12, 22, 9, 0},
-    {"¼á¶¨Á¦Á¿Ö®½ä", Slot::FINGER, 11, 0, 14, 0, 0, 0, 0, 0, 0, 0, 1},
-    {"ÍÀÉñÕßÖ®½ä", Slot::FINGER, 0, 27, 17, 0},
-    {"Î¬¿ËÂå¶û´óµÛÖ®½ä", Slot::FINGER, 0, 12, 18, 100, 9},
-    {"°²¸ñÀòË¿ËşµÄ´¥Ãş", Slot::FINGER, 11, 0, 17, 0, 6, 1},
-    {"ºúÀï°ÂÖ¸»·", Slot::FINGER, 0, 0, 11, 0, 0, 0, 0, 0, 0, 1, 1, 16},
-    // {"ÇàÍ­Áú·ÀÓù½äÖ¸-ÖĞÁ¢", Slot::FINGER, 10, 0, 18, 0, 5},
-    // {"ÇàÍ­Áú·ÀÓù½äÖ¸-ÓÑÉÆ", Slot::FINGER, 11, 0, 19, 0, 5},
-    // {"ÇàÍ­Áú·ÀÓù½äÖ¸-×ğ¾´", Slot::FINGER, 12, 0, 21, 0, 6},
-    // {"ÇàÍ­Áú·ÀÓù½äÖ¸-³ç¾´", Slot::FINGER, 12, 0, 22, 0, 6},
-    // {"ÇàÍ­Áú·ÀÓù½äÖ¸-³ç°İ", Slot::FINGER, 13, 0, 24, 0, 7},
-    // {"ÇàÍ­ÁúÎïÀí½äÖ¸-ÓÑÉÆ", Slot::FINGER, 0, 19, 9, 0, 0, 0, 0, 0, 0, 1},
-    // {"ÇàÍ­ÁúÎïÀí½äÖ¸-×ğ¾´", Slot::FINGER, 0, 21, 11, 0, 0, 0, 0, 0, 0, 1},
-    {"ÇàÍ­ÁúÎïÀí½äÖ¸-³ç¾´", Slot::FINGER, 0, 22, 11, 0, 0, 0, 0, 0, 0, 1},
-    // {"ÇàÍ­ÁúÎïÀí½äÖ¸-³ç°İ", Slot::FINGER, 0, 24, 13, 0, 0, 0, 0, 0, 0, 1},
-};
-std::vector<Gear<int16_t>> trinckets = {
-    {"ºÚÊÖÊÎÎï", Slot::TRINCKET, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2},
-    {"ÁúÑÀÊÎÎï", Slot::TRINCKET, 0, 0, 0, 0, 0, 1, 0, 0, 0, 2, 0, 56},
-};
-std::vector<Gear<int16_t>> rangeds = {
-    {"ÁúÏ¢ÊÖ³Ö»ğÅÚ", Slot::RANGED, 0, 14, 7, 0},
-    {"Ä©ÈÕÆÈ½üÖ®åó", Slot::RANGED, 5, 7, 5, 0, 0, 0, 0, 0, 0, 1},
-    {"¹ş»ôÀ¼Ö®´Ì", Slot::RANGED, 0, 18, 0, 0},
-};*/
+#include <boost/algorithm/algorithm.hpp>
+
+std::vector<Gear> LoadGears(std::ifstream& ifs, Slot slot) {
+  std::vector<Gear> gears{};
+  std::string line;
+  if (!std::getline(ifs, line)) {
+    return gears;
+  }
+  while (std::getline(ifs, line)) {
+    if (line.empty() || line[0] == '-') {
+      break;
+    }
+    
+  }
+}
+
 
 int main() {
-  /*GearCalculator<int16_t, float, uint8_t> calculator;
+  GearCalculator calculator;
   calculator.SetGears(heads, necks, shoulders, backs, chests, wrists, hands,
                       waists, legs, feet, fingers, trinckets, rangeds);
-  // calculator.SetWeight(
-  //    2, // Á¦Á¿
-  //    3, // Ãô½İ
-  //    3, // ÄÍÁ¦
 
-  //)
-  calculator.Calculate();*/
+  // Main stats:
+  // https://classic.wowhead.com/guides/classic-wow-stats-and-attributes-overview
+
+  // Armor formula:
+  // https://us.forums.blizzard.com/en/wow/t/the-armor-cap/318067
+  // reduction = armor / (armor + 400 + 85 * target_level)
+  // 0.75 = 17265 / (17265 + 400 + 85 * 63)
+  calculator.SetWeight(
+     2,     // åŠ›é‡ = 2 AP + 0.05 æ ¼æŒ¡å€¼
+     2.5,   // æ•æ· = 0.05 æš´å‡» + 0.05 èº²é—ª + 2 æŠ¤ç”²
+     3,     // è€åŠ› = 10 è¡€é‡
+     0.07,  // æŠ¤ç”² = å¤§çº¦ 160-200 æŠ¤ç”²å¯ä»¥æä¾› 1% å…ä¼¤
+     2.16,  // é˜²å¾¡ç­‰çº§ = 0.04% é—ªã€æ‹›ã€æ ¼æŒ¡ã€æœªå‘½ä¸­ã€å…çˆ†
+     15,    // é—ªèº²
+     12,    // æ‹›æ¶
+     0,     // æ ¼æŒ¡
+     0,     // æ ¼æŒ¡å€¼
+     50,    // å‘½ä¸­
+     1,     // è¶…è¿‡é˜ˆå€¼çš„å‘½ä¸­
+     30,    // æš´å‡» = 0.01 / (1 + å½“å‰æš´å‡»%) çš„ä¼¤å®³æå‡
+     1,     // AP
+     6,     // å‘½ä¸­é˜ˆå€¼
+     0.25); // ä¸»å±æ€§åŠ æˆ
+  calculator.Calculate();
   return 0;
 }
