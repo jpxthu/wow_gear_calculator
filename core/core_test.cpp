@@ -1,54 +1,146 @@
 #include "core.h"
 
 #include <cstdint>
-#include <iostream>
 #include <fstream>
+#include <iostream>
+#include <vector>
 
-#include <boost/algorithm/algorithm.hpp>
+std::vector<std::string> Split(const std::string& s, char c) {
+  std::vector<std::string> ss;
+  size_t i = 0, j = 0;
+  while (true) {
+    j = s.find_first_of(c, i);
+    ss.push_back(s.substr(i, j - i));
+    i = j + 1;
+    if (i == 0) {
+      return ss;
+    }
+  }
+}
 
-std::vector<Gear> LoadGears(std::ifstream& ifs, Slot slot) {
-  std::vector<Gear> gears{};
+StatT StringToStat(const std::string& s) {
+  return s.empty() ? StatT(0) : StatT(std::stoi(s));
+}
+
+bool LoadGears(std::ifstream& ifs, Slot slot, std::vector<Gear>* gears) {
   std::string line;
   if (!std::getline(ifs, line)) {
-    return gears;
+    return false;
   }
+
   while (std::getline(ifs, line)) {
     if (line.empty() || line[0] == '-') {
       break;
     }
-    
+    if (line[0] == '0') {
+      continue;
+    }
+    const std::vector<std::string>& ss = Split(line, ',');
+    Gear gear =
+        Gear(ss[1], slot, StringToStat(ss[2]), StringToStat(ss[3]),
+             StringToStat(ss[4]), StringToStat(ss[5]), StringToStat(ss[6]),
+             StringToStat(ss[7]), StringToStat(ss[8]), StringToStat(ss[9]),
+             StringToStat(ss[10]), StringToStat(ss[11]), StringToStat(ss[12]),
+             StringToStat(ss[13]));
+    gears->push_back(gear);
   }
+
+  return true;
 }
 
+bool LoadWeight(std::ifstream& ifs, StatWeight* weight, WeightT* bonus) {
+  std::string line;
+  while (std::getline(ifs, line)) {
+    if (line.empty() || line[0] == '-') {
+      continue;
+    }
+    const std::vector<std::string>& ss = Split(line, ',');
+    const std::string& type = ss[0];
+    WeightT v = ss[2].empty() ? WeightT(0) : WeightT(std::stod(ss[2]));
+    if (type == "STRENGTH") {
+      weight->stats[STRENGTH] = v;
+    } else if (type == "AGILITY") {
+      weight->stats[AGILITY] = v;
+    } else if (type == "STAMINA") {
+      weight->stats[STAMINA] = v;
+    } else if (type == "ARMOR") {
+      weight->stats[ARMOR] = v;
+    } else if (type == "DEFENCE") {
+      weight->stats[DEFENCE] = v;
+    } else if (type == "DODGE") {
+      weight->stats[DODGE] = v;
+    } else if (type == "PARRY") {
+      weight->stats[PARRY] = v;
+    } else if (type == "BLOCK") {
+      weight->stats[BLOCK] = v;
+    } else if (type == "BLOCK_V") {
+      weight->stats[BLOCK_VALUE] = v;
+    } else if (type == "CRIT") {
+      weight->stats[CRIT] = v;
+    } else if (type == "AP") {
+      weight->stats[ATTACK_POWER] = v;
+    } else if (type == "HIT") {
+      weight->stats[HIT] = v;
+    } else if (type == "HIT_2") {
+      weight->hit_over_threshold = v;
+    } else if (type == "HIT_THRES") {
+      weight->hit_threshold =
+          ss[2].empty() ? StatT(0) : StatT(std::stoi(ss[2]));
+    } else if (type == "BONUS") {
+      *bonus = v;
+    }
+  }
+  return true;
+}
 
 int main() {
+  std::vector<Gear> gears[SLOT_NUM]{};
+  StatWeight weight{};
+  WeightT bonus = WeightT(0);
+
+  std::ifstream ifs("settings.csv");
+  std::string line;
+
+  while (std::getline(ifs, line)) {
+    const std::vector<std::string>& ss = Split(line, ',');
+    const std::string& type = ss[2];
+    if (type.empty()) {
+      continue;
+    } else if (type.compare("HEAD") == 0) {
+      LoadGears(ifs, HEAD, &gears[HEAD]);
+    } else if (type.compare("NECK") == 0) {
+      LoadGears(ifs, NECK, &gears[NECK]);
+    } else if (type.compare("SHOULDER") == 0) {
+      LoadGears(ifs, SHOULDER, &gears[SHOULDER]);
+    } else if (type.compare("BACK") == 0) {
+      LoadGears(ifs, BACK, &gears[BACK]);
+    } else if (type.compare("CHEST") == 0) {
+      LoadGears(ifs, CHEST, &gears[CHEST]);
+    } else if (type.compare("WRIST") == 0) {
+      LoadGears(ifs, WRIST, &gears[WRIST]);
+    } else if (type.compare("HAND") == 0) {
+      LoadGears(ifs, HAND, &gears[HAND]);
+    } else if (type.compare("WAIST") == 0) {
+      LoadGears(ifs, WAIST, &gears[WAIST]);
+    } else if (type.compare("LEG") == 0) {
+      LoadGears(ifs, LEG, &gears[LEG]);
+    } else if (type.compare("FEET") == 0) {
+      LoadGears(ifs, FEET, &gears[FEET]);
+    } else if (type.compare("TRINKET") == 0) {
+      LoadGears(ifs, TRINKET, &gears[TRINKET]);
+    } else if (type.compare("RANGED") == 0) {
+      LoadGears(ifs, RANGED, &gears[RANGED]);
+    } else if (type.compare("FINGER") == 0) {
+      LoadGears(ifs, FINGER, &gears[FINGER]);
+    } else if (type.compare("WEIGHT") == 0) {
+      LoadWeight(ifs, &weight, &bonus);
+    }
+  }
+
   GearCalculator calculator;
-  calculator.SetGears(heads, necks, shoulders, backs, chests, wrists, hands,
-                      waists, legs, feet, fingers, trinckets, rangeds);
-
-  // Main stats:
-  // https://classic.wowhead.com/guides/classic-wow-stats-and-attributes-overview
-
-  // Armor formula:
-  // https://us.forums.blizzard.com/en/wow/t/the-armor-cap/318067
-  // reduction = armor / (armor + 400 + 85 * target_level)
-  // 0.75 = 17265 / (17265 + 400 + 85 * 63)
-  calculator.SetWeight(
-     2,     // 力量 = 2 AP + 0.05 格挡值
-     2.5,   // 敏捷 = 0.05 暴击 + 0.05 躲闪 + 2 护甲
-     3,     // 耐力 = 10 血量
-     0.07,  // 护甲 = 大约 160-200 护甲可以提供 1% 免伤
-     2.16,  // 防御等级 = 0.04% 闪、招、格挡、未命中、免爆
-     15,    // 闪躲
-     12,    // 招架
-     0,     // 格挡
-     0,     // 格挡值
-     50,    // 命中
-     1,     // 超过阈值的命中
-     30,    // 暴击 = 0.01 / (1 + 当前暴击%) 的伤害提升
-     1,     // AP
-     6,     // 命中阈值
-     0.25); // 主属性加成
+  calculator.SetGears(gears);
+  calculator.SetWeight(weight, bonus);
   calculator.Calculate();
+  calculator.OutputResult("result.csv");
   return 0;
 }

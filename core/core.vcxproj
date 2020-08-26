@@ -144,6 +144,7 @@
   <ItemGroup>
     <ClCompile Include="core.cpp" />
     <ClCompile Include="core_test.cpp" />
+    <ClCompile Include="strings_gb2312.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
