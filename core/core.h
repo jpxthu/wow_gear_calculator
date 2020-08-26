@@ -4,84 +4,107 @@
 #include <string>
 #include <vector>
 
+typedef uint8_t GearT;
+typedef int16_t StatT;
+typedef float WeightT;
+
 enum StatType {
-  STRENGTH = 0,  // Á¦Á¿
-  AGILITY,       // Ãô½İ
-  STAMINA,       // ÄÍÁ¦
-  ARMOR,         // »¤¼×
-  DEFENCE,       // ·ÀÓùµÈ¼¶
-  DODGE,         // ¶ãÉÁ
-  PARRY,         // ÕĞ¼Ü
-  BLOCK,         // ¸ñµ²
-  BLOCK_VALUE,   // ¸ñµ²Öµ
-  HIT,           // ÃüÖĞ
-  CRIT,          // ±©»÷
-  ATTACK_POWER,  // ¹¥»÷Ç¿¶È
+  STRENGTH = 0,  // åŠ›é‡
+  AGILITY,       // æ•æ·
+  STAMINA,       // è€åŠ›
+  ARMOR,         // æŠ¤ç”²
+  DEFENCE,       // é˜²å¾¡ç­‰çº§
+  DODGE,         // èº²é—ª
+  PARRY,         // æ‹›æ¶
+  BLOCK,         // æ ¼æŒ¡
+  BLOCK_VALUE,   // æ ¼æŒ¡å€¼
+  CRIT,          // æš´å‡»
+  ATTACK_POWER,  // æ”»å‡»å¼ºåº¦
+  HIT,           // å‘½ä¸­
   STAT_NUM
 };
 
 enum Slot {
-  HEAD = 0,  // Í·¿ø
-  NECK,      // ÏîÁ´
-  SHOULDER,  // ¼ç°ò
-  BACK,      // Åû·ç
-  CHEST,     // ĞØ¼×
-  WRIST,     // ÊÖÍó
-  HAND,      // ÊÖÌ×
-  WAIST,     // Ñü´ø
-  LEG,       // ¿ã×Ó
-  FEET,      // Ğ¬
-  TRINCKET,  // ÊÎÆ·
-  RANGED,    // Ô¶³Ì
-  FINGER,    // ½äÖ¸
+  HEAD = 0,  // å¤´ç›”
+  NECK,      // é¡¹é“¾
+  SHOULDER,  // è‚©è†€
+  BACK,      // æŠ«é£
+  CHEST,     // èƒ¸ç”²
+  WRIST,     // æ‰‹è…•
+  HAND,      // æ‰‹å¥—
+  WAIST,     // è…°å¸¦
+  LEG,       // è£¤å­
+  FEET,      // é‹
+  TRINCKET,  // é¥°å“
+  RANGED,    // è¿œç¨‹
+  FINGER,    // æˆ’æŒ‡
   SLOT_NUM,
   SLOT_NUM_TWO_FINGER
 };
 
-template <typename StatT>
 struct Gear {
   Gear(const std::string& gear_name, Slot gear_slot, StatT strength,
        StatT agility, StatT stamina, StatT armor, StatT defence = 0,
        StatT dodge = 0, StatT parry = 0, StatT block = 0, StatT block_value = 0,
        StatT hit = 0, StatT crit = 0, StatT ap = 0);
+  Gear() {}
   std::string name;
   Slot slot;
   StatT stats[STAT_NUM];
 };
 
-template <typename StatT, typename WeightT>
 struct StatWeight {
   WeightT stats[STAT_NUM];
   WeightT hit_over_threshold;
   StatT hit_threshold;
 };
 
-template <typename StatT, typename WeightT, typename SlotT>
+class Solution {
+ public:
+  Solution(const GearT* const gears_index,
+           const std::vector<Gear>* const gears,
+           const StatWeight& stat_weight,
+           float main_enhance_percentage);
+  Solution(WeightT score) : score_(score) {}
+
+  WeightT Score() const;
+  StatT Stat(StatType stat_type) const;
+  const std::string& GearName(Slot slot) const;
+
+ private:
+  Gear* gears_[SLOT_NUM_TWO_FINGER] = {nullptr};
+  StatT stats_[STAT_NUM] = {StatT(0)};
+  WeightT score_ = WeightT(0);
+};
+
 class GearCalculator {
  public:
-  void SetGears(const std::vector<Gear<StatT>>& heads,
-                const std::vector<Gear<StatT>>& necks,
-                const std::vector<Gear<StatT>>& shoulder,
-                const std::vector<Gear<StatT>>& backs,
-                const std::vector<Gear<StatT>>& chests,
-                const std::vector<Gear<StatT>>& wrists,
-                const std::vector<Gear<StatT>>& hands,
-                const std::vector<Gear<StatT>>& waists,
-                const std::vector<Gear<StatT>>& legs,
-                const std::vector<Gear<StatT>>& feet,
-                const std::vector<Gear<StatT>>& fingers,
-                const std::vector<Gear<StatT>>& trinkets,
-                const std::vector<Gear<StatT>>& ranged);
+  void SetGears(const std::vector<Gear>& heads,
+                const std::vector<Gear>& necks,
+                const std::vector<Gear>& shoulder,
+                const std::vector<Gear>& backs,
+                const std::vector<Gear>& chests,
+                const std::vector<Gear>& wrists,
+                const std::vector<Gear>& hands,
+                const std::vector<Gear>& waists,
+                const std::vector<Gear>& legs,
+                const std::vector<Gear>& feet,
+                const std::vector<Gear>& fingers,
+                const std::vector<Gear>& trinkets,
+                const std::vector<Gear>& ranged);
   void SetWeight(WeightT strength, WeightT agility, WeightT stamina,
                  WeightT armor, WeightT defence, WeightT dodge, WeightT parry,
                  WeightT block, WeightT block_value, WeightT hit,
                  WeightT hit_over_threshold, WeightT crit, WeightT ap,
-                 StatT hit_threshold);
+                 StatT hit_threshold, float main_enhance_percentage = 0.0f);
   void Calculate();
+  void OutputResult(const std::string& file) const;
 
  private:
-  std::vector<Gear<StatT>> gears_[SLOT_NUM];
-  StatWeight<StatT, WeightT> weight_;
+  std::vector<Gear> gears_[SLOT_NUM];
+  StatWeight weight_;
+  float main_enhance_percentage_ = 0.0f;
 
-  std::vector<SlotT[SLOT_NUM_TWO_FINGER]> all_;
+  std::vector<GearT[SLOT_NUM_TWO_FINGER]> all_;
+  std::vector<Solution> solutions_;
 };
