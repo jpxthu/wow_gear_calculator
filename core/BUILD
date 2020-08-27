@@ -1,7 +1,11 @@
 cc_library(
     name = "core",
     srcs = ["core.cpp"],
-    hdrs = ["core.h"],
+    hdrs = [
+        "core.h",
+        "strings_gb2312.h",
+        "strings_utf8.h",
+    ],
 )
 
 cc_binary(
