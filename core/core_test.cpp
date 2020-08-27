@@ -99,9 +99,12 @@ bool LoadSets(std::ifstream& ifs, std::vector<SetBonus>* set_bonuses) {
   }
 
   std::string line;
+  if (!std::getline(ifs, line)) {
+    return false;
+  }
   while (std::getline(ifs, line)) {
     if (line.empty() || line[0] == '-') {
-      break;;
+      break;
     }
     const std::vector<std::string>& ss = Split(line, ',');
     GearSet set;
@@ -115,8 +118,8 @@ bool LoadSets(std::ifstream& ifs, std::vector<SetBonus>* set_bonuses) {
       continue;
     }
 
-    set_bonuses[set].push_back(SetBonus{uint8_t(std::stoi(ss[1])),
-                                        WeightT(std::stof(ss[2]))});
+    set_bonuses[set].push_back(
+        SetBonus{uint8_t(std::stoi(ss[1])), WeightT(std::stof(ss[2]))});
   }
 
   return true;

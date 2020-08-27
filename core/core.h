@@ -35,19 +35,14 @@ enum Slot {
   WAIST,     // 腰带
   LEG,       // 裤子
   FEET,      // 鞋
-  TRINKET,  // 饰品
+  TRINKET,   // 饰品
   RANGED,    // 远程
   FINGER,    // 戒指
   SLOT_NUM,
   SLOT_NUM_TWO_FINGER
 };
 
-enum GearSet {
-  T2,
-  T2_5,
-  T3,
-  SET_NONE
-};
+enum GearSet { T2, T2_5, T3, SET_NONE };
 
 GearSet StringToSets(const std::string& s);
 
@@ -55,7 +50,8 @@ struct Gear {
   Gear(const std::string& gear_name, Slot gear_slot, StatT strength,
        StatT agility, StatT stamina, StatT armor, StatT defence = 0,
        StatT dodge = 0, StatT parry = 0, StatT block = 0, StatT block_value = 0,
-       StatT hit = 0, StatT crit = 0, StatT ap = 0, GearSet gear_set = SET_NONE);
+       StatT hit = 0, StatT crit = 0, StatT ap = 0,
+       GearSet gear_set = SET_NONE);
   Gear();
   std::string name;
   Slot slot;

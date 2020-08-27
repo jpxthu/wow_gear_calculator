@@ -129,8 +129,15 @@ void GearCalculator::SetGears(
   }
   all_[0][FINGER + 1] = 1;
 
+  size_t step = -1;
   const GearT finger_num = static_cast<GearT>(fingers.size());
   for (size_t i = 1; i < size; i++) {
+    size_t cur_step = 20.0 * i / size;
+    if (cur_step != step) {
+      step = cur_step;
+      std::cout << "Init: " << step * 5 << " %" << std::endl;
+    }
+
     for (int slot = 0; slot < SLOT_NUM_TWO_FINGER; slot++) {
       all_[i][slot] = all_[i - 1][slot];
     }
@@ -210,9 +217,16 @@ void GearCalculator::Calculate() {
   solutions_ = std::vector<Solution>(
       kSolutionNum, Solution(-std::numeric_limits<float>::infinity()));
 
-  for (const auto& sets : all_) {
-    Solution solution =
-        Solution(sets, gears_, weight_, set_bonuses_, main_enhance_percentage_);
+  size_t step = -1;
+  const size_t size = all_.size();
+  for (size_t i = 0; i < size; i++) {
+    size_t cur_step = 20.0 * i / size;
+    if (cur_step != step) {
+      step = cur_step;
+      std::cout << "Calculating: " << step * 5 << " %" << std::endl;
+    }
+    Solution solution = Solution(all_[i], gears_, weight_, set_bonuses_,
+                                 main_enhance_percentage_);
 
     for (auto it = solutions_.begin(); it < solutions_.end(); it++) {
       if (solution.Score() > it->Score()) {
