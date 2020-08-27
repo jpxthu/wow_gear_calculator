@@ -7,12 +7,28 @@
 
 #ifdef _MSC_VER
 #include "strings_gb2312.h"
+#else
+#include "strings_utf8.h"
 #endif
+
+GearSet StringToSets(const std::string& s) {
+  if (s.empty()) {
+    return GearSet::SET_NONE;
+  } else if (s == "T2") {
+    return GearSet::T2;
+  } else if (s == "T2.5") {
+    return GearSet::T2_5;
+  } else if (s == "T3") {
+    return GearSet::T3;
+  } else {
+    return GearSet::SET_NONE;
+  }
+}
 
 Gear::Gear(const std::string& gear_name, Slot gear_slot, StatT strength,
            StatT agility, StatT stamina, StatT armor, StatT defence,
            StatT dodge, StatT parry, StatT block, StatT block_value, StatT hit,
-           StatT crit, StatT ap)
+           StatT crit, StatT ap, GearSet gear_set)
     : name(gear_name), slot(gear_slot) {
   stats[STRENGTH] = strength;
   stats[AGILITY] = agility;
@@ -26,17 +42,21 @@ Gear::Gear(const std::string& gear_name, Slot gear_slot, StatT strength,
   stats[HIT] = hit;
   stats[CRIT] = crit;
   stats[ATTACK_POWER] = ap;
+  set = gear_set;
 }
 
-Gear::Gear() : name(), slot(), stats{} {}
+Gear::Gear() : name(), slot(), stats{StatT(0)}, set(SET_NONE) {}
 
 Solution::Solution(const GearT* const gears_index,
                    const std::vector<Gear>* const gears,
                    const StatWeight& stat_weight,
+                   const std::vector<SetBonus>* const set_bonuses,
                    float main_enhance_percentage) {
+  uint8_t set_number[GearSet::SET_NONE + 1] = {0};
   for (int stat_i = 0; stat_i < STAT_NUM; stat_i++) {
     stats_[stat_i] = StatT(0);
   }
+
   for (GearT i = 0; i < SLOT_NUM_TWO_FINGER; i++) {
     GearT index = gears_index[i];
     const Gear* gear = &gears[i == FINGER + 1 ? FINGER : i][index];
@@ -44,10 +64,13 @@ Solution::Solution(const GearT* const gears_index,
     for (int stat_i = 0; stat_i < STAT_NUM; stat_i++) {
       stats_[stat_i] += gear->stats[stat_i];
     }
+    set_number[gear->set]++;
   }
-  stats_[STRENGTH] += StatT(stats_[STRENGTH] * main_enhance_percentage);
-  stats_[AGILITY] += StatT(stats_[AGILITY] * main_enhance_percentage);
-  stats_[STAMINA] += StatT(stats_[STAMINA] * main_enhance_percentage);
+
+  for (StatType st : {STRENGTH, AGILITY, STAMINA}) {
+    stats_[st] += StatT(stats_[st] * main_enhance_percentage);
+  }
+
   score_ = WeightT(0);
   for (int stat_i = 0; stat_i < STAT_NUM; stat_i++) {
     score_ += stats_[stat_i] * stat_weight.stats[stat_i];
@@ -55,6 +78,12 @@ Solution::Solution(const GearT* const gears_index,
   if (stats_[HIT] > stat_weight.hit_threshold) {
     score_ -= (stat_weight.stats[HIT] - stat_weight.hit_over_threshold) *
               (stats_[HIT] - stat_weight.hit_threshold);
+  }
+
+  for (int set_i = 0; set_i < GearSet::SET_NONE; set_i++) {
+    for (const SetBonus& v : set_bonuses[set_i]) {
+      score_ += set_number[set_i] >= v.number ? v.bonus : WeightT(0);
+    }
   }
 }
 
@@ -92,6 +121,7 @@ void GearCalculator::SetGears(
   for (int i = 0; i < SLOT_NUM; i++) {
     size *= i == FINGER ? 1 : gears_[i].size();
   }
+  std::cout << "Total size: " << size << std::endl;
 
   all_ = std::vector<GearT[SLOT_NUM_TWO_FINGER]>(size);
   for (int i = 0; i <= FINGER; i++) {
@@ -182,7 +212,7 @@ void GearCalculator::Calculate() {
 
   for (const auto& sets : all_) {
     Solution solution =
-        Solution(sets, gears_, weight_, main_enhance_percentage_);
+        Solution(sets, gears_, weight_, set_bonuses_, main_enhance_percentage_);
 
     for (auto it = solutions_.begin(); it < solutions_.end(); it++) {
       if (solution.Score() > it->Score()) {
@@ -191,6 +221,12 @@ void GearCalculator::Calculate() {
         break;
       }
     }
+  }
+}
+
+void GearCalculator::SetSetBonuses(const std::vector<SetBonus>* set_bonuses) {
+  for (int i = 0; i < GearSet::SET_NONE; i++) {
+    set_bonuses_[i] = set_bonuses[i];
   }
 }
 
