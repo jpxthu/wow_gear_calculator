@@ -42,14 +42,24 @@ enum Slot {
   SLOT_NUM_TWO_FINGER
 };
 
+enum GearSet {
+  T2,
+  T2_5,
+  T3,
+  SET_NONE
+};
+
+GearSet StringToSets(const std::string& s);
+
 struct Gear {
   Gear(const std::string& gear_name, Slot gear_slot, StatT strength,
        StatT agility, StatT stamina, StatT armor, StatT defence = 0,
        StatT dodge = 0, StatT parry = 0, StatT block = 0, StatT block_value = 0,
-       StatT hit = 0, StatT crit = 0, StatT ap = 0);
+       StatT hit = 0, StatT crit = 0, StatT ap = 0, GearSet gear_set = SET_NONE);
   Gear();
   std::string name;
   Slot slot;
+  GearSet set;
   StatT stats[STAT_NUM];
 };
 
@@ -66,10 +76,17 @@ struct StatWeight {
   StatT hit_threshold;
 };
 
+struct SetBonus {
+  uint8_t number;
+  WeightT bonus;
+};
+
 class Solution {
  public:
   Solution(const GearT* const gears_index, const std::vector<Gear>* const gears,
-           const StatWeight& stat_weight, float main_enhance_percentage);
+           const StatWeight& stat_weight,
+           const std::vector<SetBonus>* const set_bonuses,
+           float main_enhance_percentage);
   Solution(WeightT score) : score_(score) {}
 
   WeightT Score() const;
@@ -100,6 +117,7 @@ class GearCalculator {
                  StatT hit_threshold, float main_enhance_percentage = 0.0f);
   void SetWeight(const StatWeight& weight,
                  float main_enhance_percentage = 0.0f);
+  void SetSetBonuses(const std::vector<SetBonus>* set_bonuses);
   void Calculate();
   void OutputResult(const std::string& file) const;
 
@@ -107,6 +125,7 @@ class GearCalculator {
   std::vector<Gear> gears_[SLOT_NUM];
   StatWeight weight_;
   float main_enhance_percentage_ = 0.0f;
+  std::vector<SetBonus> set_bonuses_[SET_NONE]{};
 
   std::vector<GearT[SLOT_NUM_TWO_FINGER]> all_;
   std::vector<Solution> solutions_;
