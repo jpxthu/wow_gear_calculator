@@ -41,7 +41,7 @@ bool LoadGears(std::ifstream& ifs, Slot slot, std::vector<Gear>* gears) {
              StringToStat(ss[4]), StringToStat(ss[5]), StringToStat(ss[6]),
              StringToStat(ss[7]), StringToStat(ss[8]), StringToStat(ss[9]),
              StringToStat(ss[10]), StringToStat(ss[11]), StringToStat(ss[12]),
-             StringToStat(ss[13]));
+             StringToStat(ss[13]), StringToSets(ss[14]));
     gears->push_back(gear);
   }
 
@@ -52,7 +52,7 @@ bool LoadWeight(std::ifstream& ifs, StatWeight* weight, WeightT* bonus) {
   std::string line;
   while (std::getline(ifs, line)) {
     if (line.empty() || line[0] == '-') {
-      continue;
+      break;
     }
     const std::vector<std::string>& ss = Split(line, ',');
     const std::string& type = ss[0];
@@ -93,10 +93,40 @@ bool LoadWeight(std::ifstream& ifs, StatWeight* weight, WeightT* bonus) {
   return true;
 }
 
+bool LoadSets(std::ifstream& ifs, std::vector<SetBonus>* set_bonuses) {
+  for (int i = 0; i < SET_NONE; i++) {
+    set_bonuses[i].clear();
+  }
+
+  std::string line;
+  while (std::getline(ifs, line)) {
+    if (line.empty() || line[0] == '-') {
+      break;;
+    }
+    const std::vector<std::string>& ss = Split(line, ',');
+    GearSet set;
+    if (ss[0] == "T2") {
+      set = T2;
+    } else if (ss[0] == "T2.5") {
+      set = T2_5;
+    } else if (ss[0] == "T3") {
+      set = T3;
+    } else {
+      continue;
+    }
+
+    set_bonuses[set].push_back(SetBonus{uint8_t(std::stoi(ss[1])),
+                                        WeightT(std::stof(ss[2]))});
+  }
+
+  return true;
+}
+
 int main() {
   std::vector<Gear> gears[SLOT_NUM]{};
   StatWeight weight{};
   WeightT bonus = WeightT(0);
+  std::vector<SetBonus> set_bonuses[SET_NONE];
 
   std::ifstream ifs("settings.csv");
   std::string line;
@@ -134,12 +164,15 @@ int main() {
       LoadGears(ifs, FINGER, &gears[FINGER]);
     } else if (type.compare("WEIGHT") == 0) {
       LoadWeight(ifs, &weight, &bonus);
+    } else if (type.compare("SET") == 0) {
+      LoadSets(ifs, set_bonuses);
     }
   }
 
   GearCalculator calculator;
   calculator.SetGears(gears);
   calculator.SetWeight(weight, bonus);
+  calculator.SetSetBonuses(set_bonuses);
   calculator.Calculate();
   calculator.OutputResult("result.csv");
   return 0;
